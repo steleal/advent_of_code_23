@@ -91,7 +91,7 @@ public class Main {
             ) {
                 beams.add(new Beam(beam.nextPoint(), beam.direction));
             } else if (c == '\\' || c == '/') {
-                int nextDir = getNewDir(beam.direction, c);
+                int nextDir = getTurnDir(beam.direction, c);
                 beams.add(new Beam(point.nextPoint(nextDir), nextDir));
             } else {
                 int left = getLeft(beam.direction);
@@ -112,24 +112,10 @@ public class Main {
         return (direction + 3) & 3;
     }
 
-    private int getNewDir(int direction, char c) {
-        if (c == '\\') {
-            // 0 - 3, 1-2, 2 - 1, 3 - 0;
-            return switch (direction) {
-                case 0 -> 3;
-                case 1 -> 2;
-                case 2 -> 1;
-                default -> 0;
-            };
-        } else {
-            // 0 - 1, 1 - 0, 2 - 3, 3 - 2
-            return switch (direction) {
-                case 0 -> 1;
-                case 1 -> 0;
-                case 2 -> 3;
-                default -> 2;
-            };
-        }
+    private int getTurnDir(int direction, char c) {
+        // для '\': 0 - 3, 1 - 2, 2 - 1, 3 - 0;
+        //  для '/': 0 - 1, 1 - 0, 2 - 3, 3 - 2
+        return c == '\\' ? 3 - direction : direction ^ 1;
     }
 
     private boolean isPointIn(char[][] arr, Point point) {
@@ -175,9 +161,6 @@ public class Main {
     }
 
     static class Point {
-        private static final int[] diffR = new int[]{-1, 0, 1, 0};
-        private static final int[] diffC = new int[]{0, 1, 0, -1};
-
         int row;
         int col;
 
@@ -187,7 +170,12 @@ public class Main {
         }
 
         public Point nextPoint(int dir) {
-            return new Point(row + diffR[dir], col + diffC[dir]);
+//        int[] diffR = new int[]{-1, 0, 1, 0}; nextRow = row + diffR[dir]
+//        int[] diffC = new int[]{0, 1, 0, -1}; nextCol = col + diffC[dir]
+            dir <<= 1;
+            int diffR = ((100 >> dir) & 3) - 1;
+            int diffC = ((25 >> dir) & 3) - 1;
+            return new Point(row + diffR, col + diffC);
         }
     }
 }
